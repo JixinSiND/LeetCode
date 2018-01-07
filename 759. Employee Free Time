@@ -1,0 +1,39 @@
+# Definition for an interval.
+# class Interval(object):
+#     def __init__(self, s=0, e=0):
+#         self.start = s
+#         self.end = e
+
+class Solution(object):
+    def employeeFreeTime(self, avails):
+        """
+        :type avails: List[List[Interval]]
+        :rtype: List[Interval]
+        """
+        totAvail = self.availCombine(avails)
+        resList = [] if len(totAvail) == 1 else [Interval(totAvail[0].end, totAvail[1].start)]
+        for i in range(1,len(totAvail)-1):
+            resList.append(Interval(totAvail[i].end, totAvail[i + 1].start))
+        return resList
+    
+    def availCombine(self, avail):
+        n = len(avail)
+        return avail[0] if n == 1 else self.singleCombine(self.availCombine(avail[:n/2]), self.availCombine(avail[n/2:])) 
+                
+    def singleCombine(self, l1, l2):
+        mergedList, i1, i2 = [], 0, 0
+        while i1 < len(l1) and i2 < len(l2):
+            if l1[i1].start <= l2[i2].start:
+                mergedList.append(l1[i1])
+                i1 += 1
+            else:
+                mergedList.append(l2[i2])
+                i2 += 1
+        mergedList += l1[i1:] if i1 < len(l1) else l2[i2:]
+        res = []
+        for i in range(len(mergedList)):
+            if res and res[-1].end >= mergedList[i].start:
+                res[-1].end = max(res[-1].end, mergedList[i].end)
+            else:
+                res.append(Interval(mergedList[i].start, mergedList[i].end))
+        return res
